@@ -4,12 +4,12 @@
 // - Log telemetry
 module.exports = { serve }
 
-const bodyParser = require('body-parser')
+// const bodyParser = require('body-parser')
 const cp = require('child_process')
 const express = require('express')
-const expressRateLimit = require('express-rate-limit')
+// const expressRateLimit = require('express-rate-limit')
 const fs = require('fs')
-const multer = require('multer')
+// const multer = require('multer')
 const path = require('path')
 const semver = require('semver')
 const URL = require('url').URL
@@ -27,8 +27,8 @@ const CRASH_REPORTS_PATH = path.join(config.logPath, 'crash-reports')
 const SUMMARIZE_PATH = path.join(__dirname, '..', 'bin', 'summarize-telemetry.js')
 
 // Queue telemetry messages, log them to a file in order
-let telemetryLines = []
-let isWritingTelemetry = false
+// const telemetryLines = []
+// const isWritingTelemetry = false
 
 // Attempt to create the needed log folders
 try { fs.mkdirSync(TELEMETRY_PATH, { recursive: true }) } catch (err) {}
@@ -66,14 +66,14 @@ function serve (app) {
 
 // Log telemetry JSON summaries to a file, one per line
 function serveTelemetryAPI (app) {
-  app.post('/desktop/telemetry', bodyParser.json(), function (req, res) {
-    const summary = req.body
-    summary.ip = req.ip
-    const summaryJSON = JSON.stringify(summary)
-    telemetryLines.push(summaryJSON)
-    writeTelemetryLines()
-    res.end()
-  })
+  // app.post('/desktop/telemetry', bodyParser.json(), function (req, res) {
+  //   const summary = req.body
+  //   summary.ip = req.ip
+  //   const summaryJSON = JSON.stringify(summary)
+  //   telemetryLines.push(summaryJSON)
+  //   writeTelemetryLines()
+  //   res.end()
+  // })
 
   app.use('/desktop/telemetry/', [
     auth(secret.credentials),
@@ -82,21 +82,21 @@ function serveTelemetryAPI (app) {
   ])
 }
 
-function writeTelemetryLines () {
-  if (isWritingTelemetry) return // Don't interleave writes
-  if (telemetryLines.length === 0) return // Nothing to do
+// function writeTelemetryLines () {
+//   if (isWritingTelemetry) return // Don't interleave writes
+//   if (telemetryLines.length === 0) return // Nothing to do
 
-  const today = new Date().toISOString().substring(0, 10) // YYYY-MM-DD
-  const telemetryPath = path.join(TELEMETRY_PATH, today + '.log')
-  const lines = telemetryLines.join('\n') + '\n'
-  telemetryLines = []
-  isWritingTelemetry = true
-  fs.appendFile(telemetryPath, lines, function (err) {
-    isWritingTelemetry = false
-    if (err) console.error('Error saving telemetry: ' + err.message)
-    writeTelemetryLines()
-  })
-}
+//   const today = new Date().toISOString().substring(0, 10) // YYYY-MM-DD
+//   const telemetryPath = path.join(TELEMETRY_PATH, today + '.log')
+//   const lines = telemetryLines.join('\n') + '\n'
+//   telemetryLines = []
+//   isWritingTelemetry = true
+//   fs.appendFile(telemetryPath, lines, function (err) {
+//     isWritingTelemetry = false
+//     if (err) console.error('Error saving telemetry: ' + err.message)
+//     writeTelemetryLines()
+//   })
+// }
 
 // Summarize telemetry information: active users, monthly growth, most common errors, etc
 function serveTelemetryDashboard (req, res, next) {
@@ -173,27 +173,27 @@ function serveTelemetryDashboard (req, res, next) {
 
 // Save electron process crash reports (from Crashpad), each in its own file
 function serveCrashReportsAPI (app) {
-  const upload = multer({ dest: CRASH_REPORTS_PATH }).single('upload_file_minidump')
+  // const upload = multer({ dest: CRASH_REPORTS_PATH }).single('upload_file_minidump')
 
-  const apiLimiter = expressRateLimit({
-    windowMs: 24 * 60 * 60 * 1000, // 1 day
-    max: 5
-  })
+  // const apiLimiter = expressRateLimit({
+  //   windowMs: 24 * 60 * 60 * 1000, // 1 day
+  //   max: 5
+  // })
 
-  app.post('/desktop/crash-report', apiLimiter, upload, function (req, res) {
-    if (!req.file) return res.status(500).end()
+  // app.post('/desktop/crash-report', apiLimiter, upload, function (req, res) {
+  //   if (!req.file) return res.status(500).end()
 
-    req.body.filename = req.file.filename
-    const crashLog = JSON.stringify(req.body, undefined, 2)
+  //   req.body.filename = req.file.filename
+  //   const crashLog = JSON.stringify(req.body, undefined, 2)
 
-    fs.writeFile(req.file.path + '.json', crashLog, function (err) {
-      if (err) {
-        console.error('Error saving crash report: ' + err.message)
-        res.status(500)
-      }
-      res.end()
-    })
-  })
+  //   fs.writeFile(req.file.path + '.json', crashLog, function (err) {
+  //     if (err) {
+  //       console.error('Error saving crash report: ' + err.message)
+  //       res.status(500)
+  //     }
+  //     res.end()
+  //   })
+  // })
 }
 
 // This lets us send a message to all WebTorrent Desktop users
